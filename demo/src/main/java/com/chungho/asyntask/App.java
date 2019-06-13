@@ -35,7 +35,7 @@ DO Background: when the folder has more 1000 child-items
 public class App {
 
   private static int totalFolders = 10;
-  private static int totalFilesInFolder = 10;
+  private static int totalChildItems = 10;
   // The number of items in a batch, when pushing directory contents asynchronously.
   private static final int itemBatchSize = 4;
   private static final int maxCrawlFileLimit = 2;
@@ -65,11 +65,12 @@ public class App {
           + "--------------------------------------------------------------------"+
           "\n--FOLDER: " + folder+
           "\n--------------------------------------------------------------------");
+
       try {
         List<String> batchOperations = new ArrayList<>();
         asyncDirectoryPusherService = Executors.newCachedThreadPool();
 
-        for (int i = 1; i <= totalFilesInFolder; i++) {
+        for (int i = 1; i <= totalChildItems; i++) {
           batchOperations.add(folder + " - Operation to index file with id: " + i);
 
           if (i >= maxCrawlFileLimit) {
@@ -116,7 +117,7 @@ public class App {
 
       List<String> pushItems = new ArrayList<>();
 
-      for (int i = maxCrawlFileLimit + 1; i <= totalFilesInFolder; i++) {
+      for (int i = maxCrawlFileLimit + 1; i <= totalChildItems; i++) {
         count++;
         pushItems.add(folder + " - [AsyncTask] Operation to index file with id: " + i);
         if (count % itemBatchSize == 0) {
