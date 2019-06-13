@@ -9,45 +9,79 @@ import java.util.concurrent.Executors;
   - file1
   - file2
   - file3
-  - file1
-  - file2
   # folder
+    - file1
+    - file2
+    - file3
   - file3
   - file1
   - file2
   - file3
   # folder
+    - file2
+  - file3
  */
 public class App {
 
-  private static int totalFiles = 20;
+  private static int totalFolders = 10;
+  private static int totalFilesInFolder = 10;
   // The number of items in a batch, when pushing directory contents asynchronously.
-  private static final int itemBatchSize = 5;
+  private static final int itemBatchSize = 4;
+  private static final int maxCrawlFileLimit = 2;
+  private static final List<String> folders = new ArrayList<>();
 
   public static void main(String[] args) {
-    int maxCrawlFileLimit = 5;
+    configConnector();
 
+    crawlFolders(folders);
+
+    close();
+  }
+
+  private static void close() {
+  }
+
+  private static void configConnector() {
+    getAllFoldersToCrawl();
+    getAllTrashItemsToDelete();
+  }
+
+  private static void crawlFolders(List<String> folders) {
     ExecutorService asyncDirectoryPusherService = null;
 
-    try {
-      final String dir = "DocID_113132";
-      List<String> batchOperations = new ArrayList<>();
-      asyncDirectoryPusherService = Executors.newCachedThreadPool();
+    for(String folder: folders){
+      System.out.println(""
+          + "--------------------------------------------------------------------"+
+          "\n--FOLDER: " + folder+
+          "\n--------------------------------------------------------------------");
+      try {
+        List<String> batchOperations = new ArrayList<>();
+        asyncDirectoryPusherService = Executors.newCachedThreadPool();
 
-      for (int i = 0; i < totalFiles; i++) {
-        batchOperations.add("Operation to index file with id: " + i);
+        for (int i = 1; i <= totalFilesInFolder; i++) {
+          batchOperations.add(folder + " - Operation to index file with id: " + i);
 
-        if (i >= maxCrawlFileLimit) {
-          asyncDirectoryPusherService.submit(new AsyncDirectoryContentPusher(dir + "_" + i));
-          break;
+          if (i >= maxCrawlFileLimit) {
+            asyncDirectoryPusherService.submit(new AsyncPusher(folder));
+            break;
+          }
         }
+
+        postApiOperation(batchOperations);
+
+      } finally {
+        // shut down the executor manually
+        asyncDirectoryPusherService.shutdown();
       }
+    }
+  }
 
-      postApiOperation(batchOperations);
+  private static void getAllTrashItemsToDelete() {
+  }
 
-    } finally {
-      // shut down the executor manually
-      asyncDirectoryPusherService.shutdown();
+  private static void getAllFoldersToCrawl() {
+    for (int i = 1; i < totalFolders; i++) {
+      folders.add("FOLDER_ID_" + i);
     }
   }
 
@@ -57,12 +91,12 @@ public class App {
     }
   }
 
-  private static class AsyncDirectoryContentPusher implements Runnable {
+  private static class AsyncPusher implements Runnable {
 
-    private final String dir;
+    private final String folder;
 
-    public AsyncDirectoryContentPusher(String dir) {
-      this.dir = dir;
+    public AsyncPusher(String folder) {
+      this.folder = folder;
     }
 
     public void run() {
@@ -71,9 +105,9 @@ public class App {
 
       List<String> pushItems = new ArrayList<>();
 
-      for (int i = 0; i < totalFiles; i++) {
+      for (int i = maxCrawlFileLimit + 1; i <= totalFilesInFolder; i++) {
         count++;
-        pushItems.add("[AsyncTask] Operation to index file with id: " + i);
+        pushItems.add(folder + " - [AsyncTask] Operation to index file with id: " + i);
         if (count % itemBatchSize == 0) {
           batchIndex++;
           postApiOperationAsync(batchIndex, pushItems);
@@ -90,7 +124,7 @@ public class App {
 
     private void postApiOperationAsync(int batch, List<String> pushItems) {
       for(String pushItem: pushItems){
-        System.out.println("BATCH-"+batch+"[POST API ASYNC] " + pushItem);
+        System.out.println("[POST API ASYNC] BATCH-"+batch+ " : " + pushItem);
       }
     }
   }
