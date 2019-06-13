@@ -21,6 +21,17 @@ import java.util.concurrent.Executors;
     - file2
   - file3
  */
+
+/*
+Reduce the total child items for each operation to: 1000
+
+POST operation has each 1000 items
+
+DO Background: when the folder has more 1000 child items
+	> create asynchronous execution to index child items concurrently in the background
+		> add child items to pushItem
+		> Send pushItem when reach the target of batch size
+ */
 public class App {
 
   private static int totalFolders = 10;
