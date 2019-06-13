@@ -23,12 +23,12 @@ import java.util.concurrent.Executors;
  */
 
 /*
-Reduce the total child items for each operation to: 1000
+Reduce the total number of child-items for each operation down to: 1000
 
-POST operation has each 1000 items
+POST batch operations when reaching 1000 child-items
 
-DO Background: when the folder has more 1000 child items
-	> create asynchronous execution to index child items concurrently in the background
+DO Background: when the folder has more 1000 child-items
+	> create asynchronous execution to index remaining child-items concurrently in the background
 		> add child items to pushItem
 		> Send pushItem when reach the target of batch size
  */
