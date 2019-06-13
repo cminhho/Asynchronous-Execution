@@ -4,7 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+/*
+- folder 1:
+  - file1
+  - file2
+  - file3
+  - file1
+  - file2
+  # folder
+  - file3
+  - file1
+  - file2
+  - file3
+  # folder
+ */
 public class App {
 
   private static int totalFiles = 20;
